@@ -1,4 +1,6 @@
-// lock client interface
+/**
+ lock client interface
+**/
 
 #ifndef lock_client_h
 #define lock_client_h

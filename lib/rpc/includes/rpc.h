@@ -1,4 +1,6 @@
-// RPC interface
+/**
+RPC interface
+**/
 
 #ifndef rpc_h
 #define rpc_h
@@ -9,7 +11,7 @@
 #include <map>
 #include <stdio.h>
 
-#include "thr_pool.h"
+#include "thread_pool.h"
 #include "marshall.h"
 #include "connection.h"
 

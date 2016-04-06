@@ -1,4 +1,6 @@
-// safe assertions.
+/**
+ safe assertions.
+**/
 
 #ifndef verify_h
 #define verify_h
