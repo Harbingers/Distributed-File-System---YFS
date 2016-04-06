@@ -3,9 +3,6 @@
 #ifndef fifo_h
 #define fifo_h
 
-// if queue is FULL, blocks enq()
-// if queue is Empty, blocks deq()
-
 #include <time.h>
 #include <errno.h>
 
@@ -53,4 +50,43 @@ fifo<T>::size() {
 	ScopedLock ml(&m_);
 	return q_.size();
 }
+
+// enq: if queue is FULL, blocks enq()
+template<class T> bool
+fifo<T>::enq(T e, bool blocking) {
+	ScopedLock ml(&m_);
+	while (1) {
+		if (!size_limit_ || q_.size() < size_limit_) {
+			q_.push_back(e);
+			break;
+		}
+		if (blocking)
+			VERIFY(pthread_cond_wait(&has_space_c_, &m_) == 0);
+		else
+			return false;
+	}
+	VERIFY(pthread_cond_signal(&non_empty_c_) == 0);
+	return true;
+}
+
+// deq: if queue is Empty, blocks deq()
+template<class T> void
+fifo<T>::deq(T *e) {
+	ScopedLock ml(&m_);
+	while(1) {
+		if(q_.empty()){
+			VERIFY (pthread_cond_wait(&non_empty_c_, &m_) == 0);
+		} else {
+			*e = q_.front();
+			q_.pop_front();
+			if (max_ && q_.size() < max_) {
+				VERIFY(pthread_cond_signal(&has_space_c_)==0);
+			}
+			break;
+		}
+	}
+	return;
+}
+
+#endif
 
