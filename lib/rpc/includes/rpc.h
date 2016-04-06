@@ -1,4 +1,6 @@
-// RPC interface
+/**
+RPC interface
+**/
 
 #ifndef rpc_h
 #define rpc_h
