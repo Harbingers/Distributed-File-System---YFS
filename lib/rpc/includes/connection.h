@@ -19,7 +19,7 @@ class chanmgr {
 		virtual ~chanmgr() {}
 };
 
-class connection : public aio_callback {
+class connection: public aio_callback {
     private:
 		bool readpdu();
 		bool writepdu();
