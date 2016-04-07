@@ -11,6 +11,12 @@
 
 #include "pollmgr.h"
 
+/**
+  connection class is the underlying communication channel.
+  To send RPC request/reply, call connection::send(),this will block until data is sent or the connection has failed
+  When a request/reply is received, connection makes a callback into rpcc/rpcs (see rpcc::got_pdu() and rpcs::got_pdu()).
+**/
+
 class connection;
 
 class chanmgr {
