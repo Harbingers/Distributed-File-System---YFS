@@ -17,10 +17,7 @@
 #define MAX_PDU (10<<20) //maximum PDF is 10M
 
 
-connection::connection(chanmgr *m1, int f1, int l1)
-: mgr_(m1), fd_(f1), dead_(false),waiters_(0), refno_(1),lossy_(l1)
-{
-
+connection::connection(chanmgr *m1, int f1, int l1): mgr_(m1), fd_(f1), dead_(false), waiters_(0), refno_(1), lossy_(l1) {
 	int flags = fcntl(fd_, F_GETFL, NULL);
 	flags |= O_NONBLOCK;
 	fcntl(fd_, F_SETFL, flags);
@@ -36,8 +33,7 @@ connection::connection(chanmgr *m1, int f1, int l1)
 	PollMgr::Instance()->add_callback(fd_, CB_RDONLY, this);
 }
 
-connection::~connection()
-{
+connection::~connection() {
 	VERIFY(dead_);
 	VERIFY(pthread_mutex_destroy(&m_)== 0);
 	VERIFY(pthread_mutex_destroy(&ref_m_)== 0);
@@ -50,22 +46,19 @@ connection::~connection()
 }
 
 void
-connection::incref()
-{
+connection::incref() {
 	ScopedLock ml(&ref_m_);
 	refno_++;
 }
 
 bool
-connection::isdead()
-{
+connection::isdead() {
 	ScopedLock ml(&m_);
 	return dead_;
 }
 
 void
-connection::closeconn()
-{
+connection::closeconn() {
 	{
 		ScopedLock ml(&m_);
 		if (!dead_) {
@@ -81,8 +74,7 @@ connection::closeconn()
 }
 
 void
-connection::decref()
-{
+connection::decref() {
 	VERIFY(pthread_mutex_lock(&ref_m_)==0);
 	refno_ --;
 	VERIFY(refno_>=0);
@@ -100,29 +92,22 @@ connection::decref()
 }
 
 int
-connection::ref()
-{
+connection::ref() {
 	ScopedLock rl(&ref_m_);
 	return refno_;
 }
 
 int
-connection::compare(connection *another)
-{
-        if (create_time_.tv_sec > another->create_time_.tv_sec)
-                return 1;
-        if (create_time_.tv_sec < another->create_time_.tv_sec)
-                return -1;
-        if (create_time_.tv_usec > another->create_time_.tv_usec)
-                return 1;
-        if (create_time_.tv_usec < another->create_time_.tv_usec)
-                return -1;
+connection::compare(connection *another) {
+        if (create_time_.tv_sec > another->create_time_.tv_sec) return 1;
+        if (create_time_.tv_sec < another->create_time_.tv_sec) return -1;
+        if (create_time_.tv_usec > another->create_time_.tv_usec) return 1;
+        if (create_time_.tv_usec < another->create_time_.tv_usec) return -1;
         return 0;
 }
 
 bool
-connection::send(char *b, int sz)
-{
+connection::send(char *b, int sz) {
 	ScopedLock ml(&m_);
 	waiters_++;
 	while (!dead_ && wpdu_.buf) {
@@ -168,8 +153,7 @@ connection::send(char *b, int sz)
 
 //fd_ is ready to be written
 void
-connection::write_cb(int s)
-{
+connection::write_cb(int s) {
 	ScopedLock ml(&m_);
 	VERIFY(!dead_);
 	VERIFY(fd_ == s);
@@ -191,8 +175,7 @@ connection::write_cb(int s)
 
 //fd_ is ready to be read
 void
-connection::read_cb(int s)
-{
+connection::read_cb(int s) {
 	ScopedLock ml(&m_);
 	VERIFY(fd_ == s);
 	if (dead_)  {
@@ -220,8 +203,7 @@ connection::read_cb(int s)
 }
 
 bool
-connection::writepdu()
-{
+connection::writepdu() {
 	VERIFY(wpdu_.solong >= 0);
 	if (wpdu_.solong == wpdu_.sz)
 		return true;
@@ -244,8 +226,7 @@ connection::writepdu()
 }
 
 bool
-connection::readpdu()
-{
+connection::readpdu() {
 	if (!rpdu_.sz) {
 		int sz, sz1;
 		int n = read(fd_, &sz1, sizeof(sz1));
@@ -295,9 +276,7 @@ connection::readpdu()
 	return true;
 }
 
-tcpsconn::tcpsconn(chanmgr *m1, int port, int lossytest)
-: mgr_(m1), lossy_(lossytest)
-{
+tcpsconn::tcpsconn(chanmgr *m1, int port, int lossytest): mgr_(m1), lossy_(lossytest) {
 
 	VERIFY(pthread_mutex_init(&m_,NULL) == 0);
 
@@ -341,8 +320,7 @@ tcpsconn::tcpsconn(chanmgr *m1, int port, int lossytest)
 	VERIFY((th_ = method_thread(this, false, &tcpsconn::accept_conn)) != 0);
 }
 
-tcpsconn::~tcpsconn()
-{
+tcpsconn::~tcpsconn() {
 	VERIFY(close(pipe_[1]) == 0);
 	VERIFY(pthread_join(th_, NULL) == 0);
 
@@ -355,8 +333,7 @@ tcpsconn::~tcpsconn()
 }
 
 void
-tcpsconn::process_accept()
-{
+tcpsconn::process_accept() {
 	sockaddr_in sin;
 	socklen_t slen = sizeof(sin);
 	int s1 = accept(tcp_, (sockaddr *)&sin, &slen);
@@ -389,8 +366,7 @@ tcpsconn::process_accept()
 }
 
 void
-tcpsconn::accept_conn()
-{
+tcpsconn::accept_conn() {
 	fd_set rfds;
 	int max_fd = pipe_[0] > tcp_ ? pipe_[0] : tcp_;
 
@@ -425,8 +401,7 @@ tcpsconn::accept_conn()
 }
 
 connection *
-connect_to_dst(const sockaddr_in &dst, chanmgr *mgr, int lossy)
-{
+connect_to_dst(const sockaddr_in &dst, chanmgr *mgr, int lossy) {
 	int s= socket(AF_INET, SOCK_STREAM, 0);
 	int yes = 1;
 	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes));
