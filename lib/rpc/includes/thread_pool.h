@@ -35,7 +35,8 @@ class ThreadPool {
 };
 
 template <class C, class A>
-bool ThreadPool::addObjJob(C *o, void (C::*m)(A), A a) {
+bool
+ThreadPool::addObjJob(C *o, void (C::*m)(A), A a) {
 	class objfunc_wrapper {
 		public:
 			C *o;

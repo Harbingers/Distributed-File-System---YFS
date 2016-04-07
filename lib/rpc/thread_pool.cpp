@@ -6,7 +6,8 @@
 #include "scoped_lock.h"
 #include "thread_pool.h"
 
-static void* do_worker(void *arg) {
+static void*
+do_worker(void *arg) {
 	ThreadPool *tp = (ThreadPool *)arg;
 	while (1) {
 		ThreadPool::job_t j;
@@ -50,7 +51,8 @@ ThreadPool::~ThreadPool() {
 	VERIFY(pthread_attr_destroy(&attr_)==0);
 }
 
-bool ThrPool::addJob(void *(*f)(void *), void *a) {
+bool
+ThrPool::addJob(void *(*f)(void *), void *a) {
 	job_t j;
 	j.f = f;
 	j.a = a;
@@ -58,7 +60,8 @@ bool ThrPool::addJob(void *(*f)(void *), void *a) {
 	return jobq_.enq(j,blockadd_);
 }
 
-bool ThrPool::takeJob(job_t *j) {
+bool
+ThrPool::takeJob(job_t *j) {
 	jobq_.deq(j);
 	return (j->f!=NULL);
 }

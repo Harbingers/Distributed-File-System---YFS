@@ -221,14 +221,16 @@ unmarshall& operator>>(unmarshall &, unsigned long long &);
 unmarshall& operator>>(unmarshall &, std::string &);
 
 template <class C>
-marshall & operator<<(marshall &m, std::vector<C> v) {
+marshall&
+operator<<(marshall &m, std::vector<C> v) {
 	m << (unsigned int) v.size();
 	for(unsigned i = 0; i < v.size(); i++) m << v[i];
 	return m;
 }
 
 template <class C>
-unmarshall & operator>>(unmarshall &u, std::vector<C> &v) {
+unmarshall&
+operator>>(unmarshall &u, std::vector<C> &v) {
     v.clear();
 	unsigned n;
 	u >> n;
@@ -241,7 +243,8 @@ unmarshall & operator>>(unmarshall &u, std::vector<C> &v) {
 }
 
 template <class A, class B>
-marshall & operator<<(marshall &m, const std::map<A,B> &d) {
+marshall&
+operator<<(marshall &m, const std::map<A,B> &d) {
 	typename std::map<A,B>::const_iterator i;
 	m << (unsigned int) d.size();
 	for (i = d.begin(); i != d.end(); i++) {
@@ -251,7 +254,8 @@ marshall & operator<<(marshall &m, const std::map<A,B> &d) {
 }
 
 template <class A, class B>
-unmarshall & operator>>(unmarshall &u, std::map<A,B> &d) {
+unmarshall&
+operator>>(unmarshall &u, std::map<A,B> &d) {
 	unsigned int n;
 	u >> n;
 	d.clear();

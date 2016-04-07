@@ -13,7 +13,10 @@
 
 #include "lang/verify.h"
 
-static pthread_t method_thread_parent(void *(*fn)(void *), void *arg, bool detach) {
+
+static
+pthread_t
+method_thread_parent(void *(*fn)(void *), void *arg, bool detach) {
 	pthread_t th;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -36,7 +39,9 @@ static pthread_t method_thread_parent(void *(*fn)(void *), void *arg, bool detac
 	return th;
 }
 
-static void method_thread_child() {
+static
+void
+method_thread_child() {
 	// defer pthread_cancel() by default. check explicitly by
 	// enabling then pthread_testcancel().
 	int oldstate, oldtype;
@@ -45,7 +50,8 @@ static void method_thread_child() {
 }
 
 template <class C>
-pthread_t method_thread(C *o, bool detach, void (C::*m)()) {
+pthread_t
+method_thread(C *o, bool detach, void (C::*m)()) {
 	class XXX {
 		public:
 			C *o;
@@ -67,7 +73,8 @@ pthread_t method_thread(C *o, bool detach, void (C::*m)()) {
 }
 
 template <class C, class A>
-pthread_t method_thread(C *o, bool detach, void (C::*m)(A), A a) {
+pthread_t
+method_thread(C *o, bool detach, void (C::*m)(A), A a) {
 	class XXX {
 		public:
 			C *o;
@@ -116,7 +123,8 @@ namespace {
 }
 
 template <class C, class A1, class A2>
-pthread_t method_thread(C *o, bool detach, void (C::*m)(A1 , A2 ), A1 a1, A2 a2) {
+pthread_t
+method_thread(C *o, bool detach, void (C::*m)(A1 , A2 ), A1 a1, A2 a2) {
 	XXX<C,A1,A2> *x = new XXX<C,A1,A2>;
 	x->o = o;
 	x->m = m;
@@ -126,7 +134,8 @@ pthread_t method_thread(C *o, bool detach, void (C::*m)(A1 , A2 ), A1 a1, A2 a2)
 }
 
 template <class C, class A1, class A2, class A3>
-pthread_t method_thread(C *o, bool detach, void (C::*m)(A1 , A2, A3 ), A1 a1, A2 a2, A3 a3) {
+pthread_t
+method_thread(C *o, bool detach, void (C::*m)(A1 , A2, A3 ), A1 a1, A2 a2, A3 a3) {
 	class XXX {
 		public:
 			C *o;
