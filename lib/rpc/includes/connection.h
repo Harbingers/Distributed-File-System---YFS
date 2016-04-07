@@ -20,6 +20,28 @@ class chanmgr {
 };
 
 class connection : public aio_callback {
+    private:
+		bool readpdu();
+		bool writepdu();
+
+		chanmgr *mgr_;
+		const int fd_;
+		bool dead_;
+
+		charbuf wpdu_;
+		charbuf rpdu_;
+
+        struct timeval create_time_;
+
+		int waiters_;
+		int refno_;
+		const int lossy_;
+
+		pthread_mutex_t m_;
+		pthread_mutex_t ref_m_;
+		pthread_cond_t send_complete_;
+		pthread_cond_t send_wait_;
+
 	public:
 		struct charbuf {
 			charbuf(): buf(NULL), sz(0), solong(0) {}
@@ -44,39 +66,11 @@ class connection : public aio_callback {
 		void decref();
 		int ref();
 
-                int compare(connection *another);
-	private:
-
-		bool readpdu();
-		bool writepdu();
-
-		chanmgr *mgr_;
-		const int fd_;
-		bool dead_;
-
-		charbuf wpdu_;
-		charbuf rpdu_;
-
-                struct timeval create_time_;
-
-		int waiters_;
-		int refno_;
-		const int lossy_;
-
-		pthread_mutex_t m_;
-		pthread_mutex_t ref_m_;
-		pthread_cond_t send_complete_;
-		pthread_cond_t send_wait_;
+        int compare(connection *another);
 };
 
 class tcpsconn {
-	public:
-		tcpsconn(chanmgr *m1, int port, int lossytest=0);
-		~tcpsconn();
-
-		void accept_conn();
-	private:
-
+    private:
 		pthread_mutex_t m_;
 		pthread_t th_;
 		int pipe_[2];
@@ -87,6 +81,12 @@ class tcpsconn {
 		std::map<int, connection *> conns_;
 
 		void process_accept();
+
+	public:
+		tcpsconn(chanmgr *m1, int port, int lossytest=0);
+		~tcpsconn();
+
+		void accept_conn();
 };
 
 struct bundle {

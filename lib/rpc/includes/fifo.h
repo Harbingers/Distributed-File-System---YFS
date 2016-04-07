@@ -50,7 +50,8 @@ fifo<T>::~fifo() {
 	VERIFY(pthread_cond_destroy(&has_space_c_) == 0);
 }
 
-template<class T> bool
+template<class T>
+bool
 fifo<T>::size() {
 	ScopedLock ml(&m_);
 	return q_.size();
@@ -60,7 +61,8 @@ fifo<T>::size() {
  enq: if queue is FULL, blocks enq()
 **/
 template<class T>
-bool fifo<T>::enq(T e, bool blocking) {
+bool
+fifo<T>::enq(T e, bool blocking) {
 	ScopedLock ml(&m_);
 	while (1) {
 		if (!size_limit_ || q_.size() < size_limit_) {
@@ -80,7 +82,8 @@ bool fifo<T>::enq(T e, bool blocking) {
  deq: if queue is Empty, blocks deq()
 **/
 template<class T>
-void fifo<T>::deq(T *e) {
+void
+fifo<T>::deq(T *e) {
 	ScopedLock ml(&m_);
 	while(1) {
 		if(q_.empty()){
