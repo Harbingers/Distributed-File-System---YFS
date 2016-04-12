@@ -39,7 +39,7 @@ class rsm_protocol {
     std::string state;
     viewstamp last;
   };
-
+  
   struct joinres {
     std::string log;
   };
@@ -70,7 +70,7 @@ inline unmarshall& operator>>(unmarshall &u, viewstamp &v) {
   return u;
 }
 
-inline marshall&
+inline marshall &
 operator<<(marshall &m, rsm_protocol::transferres r)
 {
   m << r.state;
@@ -78,7 +78,7 @@ operator<<(marshall &m, rsm_protocol::transferres r)
   return m;
 }
 
-inline unmarshall&
+inline unmarshall &
 operator>>(unmarshall &u, rsm_protocol::transferres &r)
 {
   u >> r.state;
@@ -86,14 +86,14 @@ operator>>(unmarshall &u, rsm_protocol::transferres &r)
   return u;
 }
 
-inline marshall&
+inline marshall &
 operator<<(marshall &m, rsm_protocol::joinres r)
 {
   m << r.log;
   return m;
 }
 
-inline unmarshall&
+inline unmarshall &
 operator>>(unmarshall &u, rsm_protocol::joinres &r)
 {
   u >> r.log;
@@ -110,4 +110,4 @@ class rsm_test_protocol {
   };
 };
 
-#endif
+#endif 

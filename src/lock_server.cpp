@@ -1,11 +1,10 @@
 // the lock server implementation
 
+#include "lock_server.h"
 #include <sstream>
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
-
-#include "lock_server.h"
+#include <arpa/inet.h>
 
 lock_server::lock_server():
   nacquire (0)

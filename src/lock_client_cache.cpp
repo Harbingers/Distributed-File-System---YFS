@@ -1,17 +1,17 @@
-/**
- RPC stubs for clients to talk to lock_server, and cache the locks
- see lock_client.cache.h for protocol details.
-**/
+// RPC stubs for clients to talk to lock_server, and cache the locks
+// see lock_client.cache.h for protocol details.
 
+#include "lock_client_cache.h"
+#include "rpc.h"
 #include <sstream>
 #include <iostream>
 #include <stdio.h>
 #include "tprintf.h"
-#include "rpc.h"
-#include "lock_client_cache.h"
 
 
-lock_client_cache::lock_client_cache(std::string xdst, class lock_release_user *_lu): lock_client(xdst), lu(_lu) {
+lock_client_cache::lock_client_cache(std::string xdst,
+                                     class lock_release_user *_lu)
+        : lock_client(xdst), lu(_lu) {
     rpcs *rlsrpc = new rpcs(0);
     rlsrpc->reg(rlock_protocol::revoke, this, &lock_client_cache::revoke_handler);
     rlsrpc->reg(rlock_protocol::retry, this, &lock_client_cache::retry_handler);
@@ -24,9 +24,7 @@ lock_client_cache::lock_client_cache(std::string xdst, class lock_release_user *
     id = host.str();
 }
 
-/**
- Caller host the little lock
-**/
+// Caller host the little lock
 lock_protocol::status
 lock_client_cache::racquire(client_lock *rlk, std::unique_lock<std::mutex> &m_) {
     int r;
@@ -48,6 +46,7 @@ lock_client_cache::racquire(client_lock *rlk, std::unique_lock<std::mutex> &m_) 
         } else {
             return ret;
         }
+
     }
 }
 
@@ -64,15 +63,15 @@ lock_client_cache::acquire(lock_protocol::lockid_t lid) {
         rlk = iter->second;
     }
 
+
     std::unique_lock<std::mutex> m_(rlk->mtx);
     mtx_.unlock();
 
-    /**
-     LOCKED, ACQUIRING, RELEASING wait on lock_cv
-    **/
+    // LOCKED, ACQUIRING, RELEASING wait on lock_cv
     if (client_lock::LOCKED == rlk->status || client_lock::ACQUIRING == rlk->status || client_lock::RELEASING == rlk->status){
         rlk->lock_cv.wait(m_, [&](){ return client_lock::FREE == rlk->status || client_lock::NONE == rlk->status;});
     }
+
     if (client_lock::NONE == rlk->status) {
         return racquire(rlk, m_);
     }
@@ -80,6 +79,7 @@ lock_client_cache::acquire(lock_protocol::lockid_t lid) {
         rlk->status = client_lock::LOCKED;
         return lock_protocol::OK;
     }
+
     return ret;
 }
 
@@ -91,8 +91,10 @@ lock_client_cache::release(lock_protocol::lockid_t lid) {
         return lock_protocol::OK;
     }
     client_lock *rlk = iter->second;
+
     std::unique_lock<std::mutex> m_(rlk->mtx);
     mtx_.unlock();
+
 
     if (client_lock::LOCKED != rlk->status){
         return lock_protocol::IOERR;
@@ -111,18 +113,24 @@ lock_client_cache::release(lock_protocol::lockid_t lid) {
 }
 
 rlock_protocol::status
-lock_client_cache::revoke_handler(lock_protocol::lockid_t lid, int &) {
+lock_client_cache::revoke_handler(lock_protocol::lockid_t lid,
+                                  int &) {
+
     std::unique_lock<std::mutex> mtx_(mtxtb);
     auto iter = rlocktb.find(lid);
     if (iter == rlocktb.end()){
         return lock_protocol::OK;
     }
     client_lock *rlk = iter->second;
+
+
     if (client_lock::FREE == rlk->status || client_lock::NONE == rlk->status){
         lu->dorelease(rlk->lid);
         rlk->status = client_lock::NONE;
         return lock_protocol::OK;
     }
+
+
     // Wait when LOCKED or ACQUIRING
     rlk->nrevoke++;
     std::unique_lock<std::mutex> m_(rlk->mtx);
@@ -135,9 +143,11 @@ lock_client_cache::revoke_handler(lock_protocol::lockid_t lid, int &) {
 }
 
 rlock_protocol::status
-lock_client_cache::retry_handler(lock_protocol::lockid_t lid, int &) {
+lock_client_cache::retry_handler(lock_protocol::lockid_t lid,
+                                 int &) {
     int ret = rlock_protocol::OK;
     std::unique_lock<std::mutex> mtx_(mtxtb);
+
     auto iter = rlocktb.find(lid);
     if (iter == rlocktb.end()){
         return lock_protocol::OK;
@@ -146,8 +156,12 @@ lock_client_cache::retry_handler(lock_protocol::lockid_t lid, int &) {
 
     std::unique_lock<std::mutex> m_(rlk->mtx);
     mtx_.unlock();
+
+//    rlk->status = client_lock::NONE;
     rlk->nretry++;
+//    rlk->status = client_lock::ACQUIRING;
     rlk->retry_cv.notify_one();
+
     return ret;
 }
 
@@ -163,3 +177,4 @@ lock_client_cache::~lock_client_cache(){
         delete rlk;
     }
 }
+

@@ -1,13 +1,12 @@
 // RPC stubs for clients to talk to lock_server
 
+#include "lock_client.h"
+#include "rpc.h"
 #include <arpa/inet.h>
-#include <stdio.h>
 
 #include <sstream>
 #include <iostream>
-
-#include "lock_client.h"
-#include "rpc.h"
+#include <stdio.h>
 
 lock_client::lock_client(std::string dst)
 {
@@ -45,3 +44,4 @@ lock_client::release(lock_protocol::lockid_t lid)
     VERIFY(ret == lock_protocol::OK);
     return r;
 }
+
