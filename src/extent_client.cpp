@@ -1,15 +1,11 @@
-/**
- RPC stubs for clients to talk to extent_server
-**/
+// RPC stubs for clients to talk to extent_server
 
+#include "extent_client.h"
 #include <sstream>
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
-
-
-#include "extent_client.h"
 
 namespace {
 
@@ -27,9 +23,8 @@ inline bool isdir(extent_protocol::extentid_t id) {
 }
 
 
-/**
- The calls assume that the caller holds a lock on the extent
-**/
+// The calls assume that the caller holds a lock on the extent
+
 extent_client::extent_client(std::string dst) {
     sockaddr_in dstsock;
     make_sockaddr(dst.c_str(), &dstsock);
@@ -73,7 +68,8 @@ extent_client::get(extent_protocol::extentid_t eid, std::string &buf) {
 }
 
 extent_protocol::status
-extent_client::getattr(extent_protocol::extentid_t eid, extent_protocol::attr &attr) {
+extent_client::getattr(extent_protocol::extentid_t eid,
+                       extent_protocol::attr &attr) {
     if (isdir(eid)) {
         return cl->call(extent_protocol::getattr, eid, attr);
     }
@@ -89,7 +85,7 @@ extent_client::getattr(extent_protocol::extentid_t eid, extent_protocol::attr &a
 
     extent_protocol::status ret = extent_protocol::OK;
     ret = cl->call(extent_protocol::getattr, eid, attr);
-
+    
     {
         std::unique_lock<std::mutex> m_(cache_mtx_);
         if (cache_.end() != iter) {
@@ -115,7 +111,7 @@ extent_client::put(extent_protocol::extentid_t eid, std::string buf) {
         iter->second.attr.size = buf.size();
         iter->second.modified = true;
         return extent_protocol::OK;
-    }
+    } 
 
     extent_protocol::status ret = extent_protocol::OK;
     extent_protocol::attr attr;
@@ -146,7 +142,8 @@ extent_protocol::status extent_client::create(extent_protocol::extentid_t pid, s
     return cl->call(extent_protocol::create, pid, name, id, r);
 }
 
-extent_protocol::status extent_client::lookup(extent_protocol::extentid_t pid, std::string name, extent_protocol::extentid_t &id) {
+extent_protocol::status extent_client::lookup(extent_protocol::extentid_t pid, std::string name,
+                                              extent_protocol::extentid_t &id) {
     return  cl->call(extent_protocol::lookup, pid, name, id);
 }
 extent_protocol::status extent_client::readdir(extent_protocol::extentid_t pid, std::map<std::string, extent_protocol::extentid_t> &ents){

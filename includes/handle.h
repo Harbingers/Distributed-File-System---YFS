@@ -1,27 +1,30 @@
-/** manage a cache of RPC connections.
-   assuming cid is a std::string holding the host:port of the RPC server you want
-   to talk to:
-
-   handle h(cid);
-   rpcc *cl = h.safebind();
-   if(cl){
-     ret = cl->call(...);
-   } else {
-     bind() failed
-   }
-
-   if the calling program has not contacted cid before, safebind() will create a new
-   connection, call bind(), and return an rpcc*, or 0 if bind() failed. if the
-   program has previously contacted cid, safebind() just returns the previously
-   created rpcc*. best not to hold any mutexes while calling safebind().
-**/
+// manage a cache of RPC connections.
+// assuming cid is a std::string holding the
+// host:port of the RPC server you want
+// to talk to:
+//
+// handle h(cid);
+// rpcc *cl = h.safebind();
+// if(cl){
+//   ret = cl->call(...);
+// } else {
+//   bind() failed
+// }
+//
+// if the calling program has not contacted
+// cid before, safebind() will create a new
+// connection, call bind(), and return
+// an rpcc*, or 0 if bind() failed. if the
+// program has previously contacted cid,
+// safebind() just returns the previously
+// created rpcc*. best not to hold any
+// mutexes while calling safebind().
 
 #ifndef handle_h
 #define handle_h
 
 #include <string>
 #include <vector>
-
 #include "rpc.h"
 
 struct hinfo {
@@ -42,7 +45,7 @@ class handle {
    * Since bind may block, the caller probably should not hold a mutex
    * when calling safebind.
    *
-   * return:
+   * return: 
    *   if the first safebind succeeded, all later calls would return
    *   a rpcc object; otherwise, all later calls would return NULL.
    *

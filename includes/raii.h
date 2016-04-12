@@ -5,9 +5,8 @@
 #ifndef MIT_6_824_2012_RAII_H
 #define MIT_6_824_2012_RAII_H
 
-#include <fstream>
 #include "lock_client.h"
-
+#include <fstream>
 
 class scope_lock{
   public:

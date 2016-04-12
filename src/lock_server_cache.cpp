@@ -1,23 +1,21 @@
-/**
- the caching lock server implementation
-**/
+// the caching lock server implementation
 
+#include "lock_server_cache.h"
+#include <sstream>
 #include <stdio.h>
 #include <unistd.h>
-#include "tprintf.h"
 #include <arpa/inet.h>
-
-#include <sstream>
-
 #include "lang/verify.h"
 #include "handle.h"
-#include "lock_server_cache.h"
+#include "tprintf.h"
 
 
 lock_server_cache::lock_server_cache() : nacquire(0) {
 }
 
-int lock_server_cache::acquire(lock_protocol::lockid_t lid, std::string id, int &) {
+
+int lock_server_cache::acquire(lock_protocol::lockid_t lid, std::string id,
+                               int &) {
     tprintf("%s acquire for %llu\n", id.data(), lid);
     std::unique_lock<std::mutex> mtx_(mtxtb);
     auto iter = locktb.find(lid);
@@ -72,7 +70,9 @@ int lock_server_cache::acquire(lock_protocol::lockid_t lid, std::string id, int 
 }
 
 int
-lock_server_cache::release(lock_protocol::lockid_t lid, std::string id, int &r) {
+lock_server_cache::release(lock_protocol::lockid_t lid, std::string id,
+                           int &r) {
+
     printf("%s release %llu\n", id.data(), lid);
     std::unique_lock<std::mutex> mtx_(mtxtb);
 
@@ -96,3 +96,4 @@ lock_server_cache::stat(lock_protocol::lockid_t lid, int &r) {
     r = nacquire;
     return lock_protocol::OK;
 }
+

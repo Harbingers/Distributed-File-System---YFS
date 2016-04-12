@@ -1,11 +1,10 @@
+#include "handle.h"
 #include <stdio.h>
 #include "tprintf.h"
 
-#include "handle.h"
-
 handle_mgr mgr;
 
-handle::handle(std::string m)
+handle::handle(std::string m) 
 {
   h = mgr.get_handle(m);
 }
@@ -25,15 +24,13 @@ handle::safebind()
   rpcc *cl = new rpcc(dstsock);
   //tprintf("handler_mgr::get_handle trying to bind...%s\n", h->m.c_str());
   int ret;
-  /**
-     Starting with lab 6, our test script assumes that the failure
-     can be detected by paxos and rsm layer within few seconds. We have
-     to set the timeout with a small value to support the assumption.
-
-     Note: with RPC_LOSSY=5, your lab would failed to pass the tests of
-     lab 6 and lab 7 because the rpc layer may delay your RPC request,
-     and cause a time out failure. Please make sure RPC_LOSSY is set to 0.
-  **/
+  // Starting with lab 6, our test script assumes that the failure
+  // can be detected by paxos and rsm layer within few seconds. We have
+  // to set the timeout with a small value to support the assumption.
+  // 
+  // Note: with RPC_LOSSY=5, your lab would failed to pass the tests of
+  // lab 6 and lab 7 because the rpc layer may delay your RPC request, 
+  // and cause a time out failure. Please make sure RPC_LOSSY is set to 0.
   ret = cl->bind(rpcc::to(1000));
   if (ret < 0) {
     tprintf("handle_mgr::get_handle bind failure! %s %d\n", h->m.c_str(), ret);
@@ -46,7 +43,7 @@ handle::safebind()
   return h->cl;
 }
 
-handle::~handle()
+handle::~handle() 
 {
   if (h) mgr.done_handle(h);
 }
@@ -76,7 +73,7 @@ handle_mgr::get_handle(std::string m)
   return h;
 }
 
-void
+void 
 handle_mgr::done_handle(struct hinfo *h)
 {
   ScopedLock ml(&handle_mutex);
@@ -92,9 +89,7 @@ handle_mgr::delete_handle(std::string m)
   delete_handle_wo(m);
 }
 
-/**
- Must be called with handle_mutex locked.
-**/
+// Must be called with handle_mutex locked.
 void
 handle_mgr::delete_handle_wo(std::string m)
 {

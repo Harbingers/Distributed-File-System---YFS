@@ -1,31 +1,27 @@
-/**
- lock client interface.
-**/
+// lock client interface.
 
 #ifndef lock_client_cache_rsm_h
+
 #define lock_client_cache_rsm_h
 
 #include <string>
+#include "lock_protocol.h"
+#include "rpc.h"
+#include "fifo.h"
+#include "lock_client.h"
+#include "lang/verify.h"
+
+#include "rsm_client.h"
+#include "extent_client.h"
+
 #include <mutex>
 #include <condition_variable>
 #include <map>
 #include <atomic>
 
-#include "lang/verify.h"
-#include "fifo.h"
-#include "rpc.h"
-
-#include "lock_protocol.h"
-#include "lock_client.h"
-
-#include "rsm_client.h"
-#include "extent_client.h"
-
-/**
-  Classes that inherit lock_release_user can override dorelease so that
-  that they will be called when lock_client releases a lock.
-  You will not need to do anything with this class until Lab 5.
-**/
+// Classes that inherit lock_release_user can override dorelease so that 
+// that they will be called when lock_client releases a lock.
+// You will not need to do anything with this class until Lab 5.
 class lock_release_user {
  public:
   virtual void dorelease(lock_protocol::lockid_t) = 0;
@@ -37,13 +33,14 @@ class lock_release: public lock_release_user {
   public:
     lock_release(extent_client *e): ec(e) {}
     void dorelease(lock_protocol::lockid_t lid) override {
-        ec->flush(lid);
+        ec->flush(lid); 
     }
 };
 
+
 class lock_client_cache_rsm;
 
-// Clients that caches locks.  The server can revoke locks using
+// Clients that caches locks.  The server can revoke locks using 
 // lock_revoke_server.
 class lock_client_cache_rsm : public lock_client {
  private:
@@ -78,6 +75,7 @@ class lock_client_cache_rsm : public lock_client {
 
   std::map<lock_protocol::lockid_t, client_lock*> rlocktb;
   std::mutex mtxtb;
+
   lock_protocol::status racquire(client_lock *rlk, std::unique_lock<std::mutex> &m);
 
   struct release_info {
@@ -85,6 +83,7 @@ class lock_client_cache_rsm : public lock_client {
       lock_protocol::xid_t xid;
   };
   fifo<client_lock*> release_fifo;
+
   pthread_t th;
 
  public:
@@ -94,8 +93,10 @@ class lock_client_cache_rsm : public lock_client {
   lock_protocol::status acquire(lock_protocol::lockid_t);
   virtual lock_protocol::status release(lock_protocol::lockid_t);
   void releaser();
-  rlock_protocol::status revoke_handler(lock_protocol::lockid_t, lock_protocol::xid_t, int &);
-  rlock_protocol::status retry_handler(lock_protocol::lockid_t, lock_protocol::xid_t, int &);
+  rlock_protocol::status revoke_handler(lock_protocol::lockid_t, 
+				        lock_protocol::xid_t, int &);
+  rlock_protocol::status retry_handler(lock_protocol::lockid_t, 
+				       lock_protocol::xid_t, int &);
 };
 
 
